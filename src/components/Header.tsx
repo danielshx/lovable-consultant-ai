@@ -40,9 +40,9 @@ export const Header = () => {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <div className="text-right glass px-4 py-2 rounded-lg">
+            <div className="text-right glass px-5 py-3 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 shadow-lg">
               <p className="text-sm font-semibold text-white">{user?.name}</p>
-              <p className="text-xs text-white/70">{user?.email}</p>
+              <p className="text-xs text-white/90 mt-0.5">{user?.email}</p>
             </div>
             <Button 
               variant="outline" 

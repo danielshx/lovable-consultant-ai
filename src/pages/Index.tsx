@@ -158,7 +158,7 @@ const Index = () => {
                 className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-primary data-[state=active]:text-white data-[state=active]:shadow-glow transition-all font-semibold"
               >
                 <Sparkles className="h-4 w-4" />
-                <span>AI Research</span>
+                <span>Project Knowledge</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="market" 
