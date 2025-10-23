@@ -8,6 +8,9 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { Header } from "@/components/Header";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
+import Projects from "./pages/Projects";
+import Meetings from "./pages/Meetings";
+import Team from "./pages/Team";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { mockAuth } from "@/lib/auth";
@@ -43,9 +46,9 @@ const App = () => {
                         <main className="flex-1">
                           <Routes>
                             <Route path="/" element={<Index />} />
-                            <Route path="/projects" element={<Index />} />
-                            <Route path="/meetings" element={<Index />} />
-                            <Route path="/team" element={<Index />} />
+                            <Route path="/projects" element={<Projects />} />
+                            <Route path="/meetings" element={<Meetings />} />
+                            <Route path="/team" element={<Team />} />
                             <Route path="*" element={<NotFound />} />
                           </Routes>
                         </main>

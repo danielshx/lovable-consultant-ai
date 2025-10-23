@@ -1,0 +1,65 @@
+import { useState } from "react";
+import { mockProjects } from "@/lib/mockData";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { FolderKanban, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+const Projects = () => {
+  return (
+    <div className="min-h-screen bg-[var(--gradient-subtle)]">
+      <main className="container mx-auto px-6 py-8 max-w-7xl">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-foreground mb-2">Projects</h2>
+          <p className="text-muted-foreground">
+            Overview of all consulting projects
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {mockProjects.map((project) => (
+            <Card 
+              key={project.id}
+              className="shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-hover)] transition-shadow"
+            >
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <FolderKanban className="h-8 w-8 text-primary" />
+                  <Badge variant="secondary">{project.team.length} members</Badge>
+                </div>
+                <CardTitle className="text-foreground mt-4">{project.name}</CardTitle>
+                <CardDescription>Active consulting engagement</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-semibold text-foreground">Team Members</span>
+                  </div>
+                  <div className="space-y-2">
+                    {project.team.slice(0, 3).map((member, index) => (
+                      <div key={index} className="flex items-center justify-between text-sm">
+                        <span className="text-foreground">{member.name}</span>
+                        <Badge variant="outline" className="text-xs">{member.role}</Badge>
+                      </div>
+                    ))}
+                    {project.team.length > 3 && (
+                      <p className="text-xs text-muted-foreground">
+                        +{project.team.length - 3} more team members
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <Button variant="outline" className="w-full">
+                  View Details
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default Projects;
