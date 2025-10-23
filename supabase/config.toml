@@ -8,3 +8,9 @@ verify_jwt = false
 
 [functions.transcribe]
 verify_jwt = false
+
+[functions.project-readme-get]
+verify_jwt = true
+
+[functions.project-readme-post]
+verify_jwt = true
