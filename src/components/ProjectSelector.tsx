@@ -76,7 +76,16 @@ export const ProjectSelector = ({ selectedProject, onProjectChange }: ProjectSel
       team: project.project_team_members || [],
     }));
 
-    setProjects(formattedProjects);
+    // Remove duplicates based on project ID
+    const uniqueProjects = formattedProjects.reduce((acc: Project[], current) => {
+      const exists = acc.find(p => p.id === current.id);
+      if (!exists) {
+        acc.push(current);
+      }
+      return acc;
+    }, []);
+
+    setProjects(uniqueProjects);
   };
 
   const handleChange = (projectId: string) => {

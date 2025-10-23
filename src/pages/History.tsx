@@ -84,7 +84,16 @@ const History = () => {
       return;
     }
 
-    setProjects(data || []);
+    // Remove duplicates based on project ID
+    const uniqueProjects = (data || []).reduce((acc: Project[], current) => {
+      const exists = acc.find(p => p.id === current.id);
+      if (!exists) {
+        acc.push(current);
+      }
+      return acc;
+    }, []);
+
+    setProjects(uniqueProjects);
   };
 
   const fetchAllAnalyses = async () => {
