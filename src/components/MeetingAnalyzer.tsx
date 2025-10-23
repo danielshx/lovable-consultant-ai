@@ -17,6 +17,7 @@ interface MeetingAnalyzerProps {
 export const MeetingAnalyzer = ({ meeting, onClose }: MeetingAnalyzerProps) => {
   const [transcript, setTranscript] = useState(meeting.transcript);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
   const [analysis, setAnalysis] = useState<string>("");
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>(meeting.attachedFiles || []);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -26,39 +27,80 @@ export const MeetingAnalyzer = ({ meeting, onClose }: MeetingAnalyzerProps) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const fileType = file.name.endsWith('.mp3') ? 'audio' : 'text';
+    // Validate file type
+    const isTextFile = file.name.endsWith('.txt') || file.type === 'text/plain';
+    const isAudioFile = file.name.endsWith('.mp3') || file.type === 'audio/mpeg' || file.type === 'audio/mp3';
     
-    if (fileType === 'text') {
-      // Read text file and populate transcript
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const content = e.target?.result as string;
-        setTranscript(content);
-        toast({
-          title: "File Loaded",
-          description: `${file.name} has been loaded into the transcript.`,
-        });
-      };
-      reader.readAsText(file);
-    } else {
-      // Mock: Show that audio was uploaded (no actual transcription)
+    if (!isTextFile && !isAudioFile) {
       toast({
-        title: "Audio File Uploaded",
-        description: `${file.name} uploaded. In production, this would be transcribed automatically.`,
+        title: "Invalid File Type",
+        description: "Please upload a .txt or .mp3 file.",
+        variant: "destructive",
       });
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      return;
     }
 
-    // Add to attached files list
-    const newFile: AttachedFile = {
-      name: file.name,
-      type: fileType,
-      size: file.size
-    };
-    setAttachedFiles([...attachedFiles, newFile]);
-    
-    // Reset input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+    setIsTranscribing(true);
+
+    try {
+      // Convert file to base64
+      const base64Data = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result as string;
+          // Remove data URL prefix (e.g., "data:audio/mpeg;base64,")
+          const base64 = result.split(',')[1];
+          resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      // Call transcribe edge function
+      const { data, error } = await supabase.functions.invoke('transcribe', {
+        body: {
+          fileData: base64Data,
+          fileName: file.name,
+          fileType: file.type,
+        },
+        headers: {
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.text) {
+        setTranscript(data.text);
+        toast({
+          title: "File Processed",
+          description: `${file.name} has been ${isAudioFile ? 'transcribed' : 'loaded'} successfully.`,
+        });
+
+        // Add to attached files list
+        const newFile: AttachedFile = {
+          name: file.name,
+          type: isAudioFile ? 'audio' : 'text',
+          size: file.size
+        };
+        setAttachedFiles([...attachedFiles, newFile]);
+      }
+    } catch (error: any) {
+      console.error('File upload error:', error);
+      toast({
+        title: "Upload Failed",
+        description: error.message || "Failed to process the file.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsTranscribing(false);
+      // Reset input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -148,11 +190,15 @@ export const MeetingAnalyzer = ({ meeting, onClose }: MeetingAnalyzerProps) => {
         )}
 
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="text-sm font-semibold text-foreground">
-              Meeting Transcript:
+          <label className="text-sm font-semibold text-foreground block mb-2">
+            Meeting Transcript:
+          </label>
+          
+          <div className="mb-3 p-3 rounded-lg bg-secondary/20 border border-border">
+            <label className="text-xs font-medium text-muted-foreground block mb-2">
+              Or upload a file:
             </label>
-            <div>
+            <div className="flex items-center gap-2">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -164,17 +210,32 @@ export const MeetingAnalyzer = ({ meeting, onClose }: MeetingAnalyzerProps) => {
                 variant="outline"
                 size="sm"
                 onClick={() => fileInputRef.current?.click()}
+                disabled={isTranscribing}
               >
-                <Upload className="h-4 w-4 mr-2" />
-                Upload File
+                {isTranscribing ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload & Transcribe
+                  </>
+                )}
               </Button>
+              <span className="text-xs text-muted-foreground">
+                Accepts .txt and .mp3 files
+              </span>
             </div>
           </div>
+
           <Textarea
             value={transcript}
             onChange={(e) => setTranscript(e.target.value)}
             className="min-h-[150px] font-mono text-sm bg-secondary/20"
-            placeholder="Enter or edit the meeting transcript, or upload a .txt or .mp3 file..."
+            placeholder="Enter or edit the meeting transcript..."
+            disabled={isTranscribing}
           />
         </div>
 
