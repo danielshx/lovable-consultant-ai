@@ -95,18 +95,29 @@ export const ProjectSelector = ({ selectedProject, onProjectChange }: ProjectSel
 
   return (
     <div className="mb-6">
-      <div className="flex items-center gap-2 mb-2">
-        <FolderKanban className="h-5 w-5 text-primary" />
-        <label className="text-sm font-semibold text-foreground">Select Project:</label>
+      <div className="flex items-center gap-3 mb-3">
+        <div className="p-2 bg-primary/10 rounded-lg shadow-card">
+          <FolderKanban className="h-5 w-5 text-primary" />
+        </div>
+        <label className="text-base font-heading font-semibold text-foreground">
+          Select Project
+        </label>
       </div>
       <Select value={selectedProject?.id || ""} onValueChange={handleChange}>
-        <SelectTrigger className="w-full bg-card hover:bg-secondary/50 transition-colors">
-          <SelectValue placeholder="Choose a project..." />
+        <SelectTrigger className="w-full h-14 bg-card hover:bg-secondary/50 transition-all shadow-card hover:shadow-hover border-border/50 hover:border-primary/30">
+          <SelectValue placeholder="Choose a project to get started..." />
         </SelectTrigger>
-        <SelectContent className="bg-popover z-50">
+        <SelectContent className="bg-popover z-50 shadow-hover border-border">
           {projects.map((project) => (
-            <SelectItem key={project.id} value={project.id} className="cursor-pointer">
-              {project.name}
+            <SelectItem 
+              key={project.id} 
+              value={project.id} 
+              className="cursor-pointer hover:bg-secondary/80 transition-colors py-3"
+            >
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                <span className="font-medium">{project.name}</span>
+              </div>
             </SelectItem>
           ))}
         </SelectContent>

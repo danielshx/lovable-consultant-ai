@@ -116,15 +116,15 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-subtle">
       <main className="container mx-auto px-6 py-10 max-w-7xl">
         <div className="mb-10 animate-fade-in">
-          <h1 className="text-4xl font-heading font-bold text-foreground mb-3 tracking-tight">
+          <h1 className="text-5xl font-heading font-bold text-foreground mb-4 tracking-tight">
             Project Dashboard
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl">
+          <p className="text-xl text-muted-foreground max-w-2xl leading-relaxed">
             Manage your consulting projects and analyze meetings with AI-powered insights
           </p>
         </div>
 
-        <div className="mb-8 animate-fade-in">
+        <div className="mb-10 animate-fade-in">
           <ProjectSelector 
             selectedProject={selectedProject}
             onProjectChange={handleProjectChange}
@@ -132,47 +132,47 @@ const Index = () => {
         </div>
 
         {!selectedProject ? (
-          <div className="flex flex-col items-center justify-center py-32 text-center animate-fade-in-up">
-            <div className="rounded-full bg-primary/10 p-8 mb-6 shadow-card">
-              <Briefcase className="h-20 w-20 text-primary" />
+          <div className="flex flex-col items-center justify-center py-40 text-center animate-fade-in-up">
+            <div className="rounded-full bg-gradient-primary p-10 mb-8 shadow-glow">
+              <Briefcase className="h-24 w-24 text-white" />
             </div>
-            <h2 className="text-3xl font-heading font-bold text-foreground mb-3">
+            <h2 className="text-4xl font-heading font-bold text-foreground mb-4 tracking-tight">
               Select a Project to Get Started
             </h2>
-            <p className="text-muted-foreground max-w-md text-lg">
+            <p className="text-muted-foreground max-w-md text-lg leading-relaxed">
               Choose a project from the dropdown above to view team members, meetings, and AI-powered insights.
             </p>
           </div>
         ) : (
           <Tabs defaultValue="meetings" className="w-full animate-fade-in">
-            <TabsList className="grid w-full grid-cols-4 mb-8 h-12 bg-secondary/50 p-1 shadow-card">
+            <TabsList className="grid w-full grid-cols-4 mb-10 h-14 bg-card p-1.5 shadow-card rounded-xl border border-border/50">
               <TabsTrigger 
                 value="meetings" 
-                className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all"
+                className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-primary data-[state=active]:text-white data-[state=active]:shadow-glow transition-all font-semibold"
               >
                 <Calendar className="h-4 w-4" />
-                <span className="font-medium">Meeting Debriefs</span>
+                <span>Meeting Debriefs</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="research" 
-                className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all"
+                className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-primary data-[state=active]:text-white data-[state=active]:shadow-glow transition-all font-semibold"
               >
                 <Sparkles className="h-4 w-4" />
-                <span className="font-medium">AI Research</span>
+                <span>AI Research</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="market" 
-                className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all"
+                className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-primary data-[state=active]:text-white data-[state=active]:shadow-glow transition-all font-semibold"
               >
                 <TrendingUp className="h-4 w-4" />
-                <span className="font-medium">Market Analysis</span>
+                <span>Market Analysis</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="swot" 
-                className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all"
+                className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-primary data-[state=active]:text-white data-[state=active]:shadow-glow transition-all font-semibold"
               >
                 <Target className="h-4 w-4" />
-                <span className="font-medium">SWOT Analysis</span>
+                <span>SWOT Analysis</span>
               </TabsTrigger>
             </TabsList>
 
