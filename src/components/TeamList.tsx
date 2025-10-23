@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Mail, Users, Building2, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ClientPersonaDialog } from "@/components/ClientPersonaDialog";
 
 interface TeamMember {
   id: string;
@@ -69,6 +70,10 @@ export const TeamList = ({ project }: TeamListProps) => {
                       {project.client.phone}
                     </Button>
                   )}
+                  <ClientPersonaDialog 
+                    clientId={project.client.id} 
+                    clientName={project.client.company} 
+                  />
                 </div>
               </div>
             </div>

@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      client_personas: {
+        Row: {
+          client_id: string
+          created_at: string
+          cta_style: string
+          data_density: string
+          formality: string
+          id: string
+          length: string
+          notes: string | null
+          updated_at: string
+          urgency: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          cta_style?: string
+          data_density?: string
+          formality?: string
+          id?: string
+          length?: string
+          notes?: string | null
+          updated_at?: string
+          urgency?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          cta_style?: string
+          data_density?: string
+          formality?: string
+          id?: string
+          length?: string
+          notes?: string | null
+          updated_at?: string
+          urgency?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_personas_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           company: string
