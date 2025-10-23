@@ -1,7 +1,8 @@
 import { Meeting } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Clock, Users } from "lucide-react";
+import { Calendar, Clock, Users, FileText, FileAudio } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface MeetingListProps {
   meetings: Meeting[];
@@ -46,6 +47,20 @@ export const MeetingList = ({ meetings, onMeetingSelect }: MeetingListProps) => 
                       {meeting.attendees.length} attendees
                     </span>
                   </div>
+                  {meeting.attachedFiles && meeting.attachedFiles.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {meeting.attachedFiles.map((file, idx) => (
+                        <Badge key={idx} variant="outline" className="text-xs">
+                          {file.type === 'audio' ? (
+                            <FileAudio className="h-3 w-3 mr-1" />
+                          ) : (
+                            <FileText className="h-3 w-3 mr-1" />
+                          )}
+                          {file.name}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <Button 
                   variant="ghost" 

@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { Meeting } from "@/lib/mockData";
+import { useState, useRef } from "react";
+import { Meeting, AttachedFile } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Brain, Loader2, Calendar, Users, X } from "lucide-react";
+import { Brain, Loader2, Calendar, Users, X, Upload, FileAudio, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
@@ -18,7 +18,49 @@ export const MeetingAnalyzer = ({ meeting, onClose }: MeetingAnalyzerProps) => {
   const [transcript, setTranscript] = useState(meeting.transcript);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<string>("");
+  const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>(meeting.attachedFiles || []);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const fileType = file.name.endsWith('.mp3') ? 'audio' : 'text';
+    
+    if (fileType === 'text') {
+      // Read text file and populate transcript
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target?.result as string;
+        setTranscript(content);
+        toast({
+          title: "File Loaded",
+          description: `${file.name} has been loaded into the transcript.`,
+        });
+      };
+      reader.readAsText(file);
+    } else {
+      // Mock: Show that audio was uploaded (no actual transcription)
+      toast({
+        title: "Audio File Uploaded",
+        description: `${file.name} uploaded. In production, this would be transcribed automatically.`,
+      });
+    }
+
+    // Add to attached files list
+    const newFile: AttachedFile = {
+      name: file.name,
+      type: fileType,
+      size: file.size
+    };
+    setAttachedFiles([...attachedFiles, newFile]);
+    
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const handleAnalyze = async () => {
     if (!transcript.trim()) {
@@ -87,15 +129,52 @@ export const MeetingAnalyzer = ({ meeting, onClose }: MeetingAnalyzerProps) => {
         <p className="text-sm font-medium text-muted-foreground mt-2">{meeting.topic}</p>
       </CardHeader>
       <CardContent className="space-y-4">
+        {attachedFiles.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {attachedFiles.map((file, idx) => (
+              <Badge key={idx} variant="secondary" className="text-xs">
+                {file.type === 'audio' ? (
+                  <FileAudio className="h-3 w-3 mr-1" />
+                ) : (
+                  <FileText className="h-3 w-3 mr-1" />
+                )}
+                {file.name}
+                <span className="ml-1 text-muted-foreground">
+                  ({(file.size / 1024).toFixed(1)} KB)
+                </span>
+              </Badge>
+            ))}
+          </div>
+        )}
+
         <div>
-          <label className="text-sm font-semibold text-foreground mb-2 block">
-            Meeting Transcript:
-          </label>
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-sm font-semibold text-foreground">
+              Meeting Transcript:
+            </label>
+            <div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".txt,.mp3"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Upload File
+              </Button>
+            </div>
+          </div>
           <Textarea
             value={transcript}
             onChange={(e) => setTranscript(e.target.value)}
             className="min-h-[150px] font-mono text-sm bg-secondary/20"
-            placeholder="Enter or edit the meeting transcript..."
+            placeholder="Enter or edit the meeting transcript, or upload a .txt or .mp3 file..."
           />
         </div>
 
