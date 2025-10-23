@@ -14,6 +14,112 @@ export type Database = {
   }
   public: {
     Tables: {
+      clients: {
+        Row: {
+          company: string
+          contact_person: string
+          created_at: string
+          email: string
+          id: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          company: string
+          contact_person: string
+          created_at?: string
+          email: string
+          id?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company?: string
+          contact_person?: string
+          created_at?: string
+          email?: string
+          id?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      meeting_files: {
+        Row: {
+          created_at: string
+          id: string
+          meeting_id: string
+          name: string
+          size: number
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          meeting_id: string
+          name: string
+          size: number
+          type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          meeting_id?: string
+          name?: string
+          size?: number
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_files_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meetings: {
+        Row: {
+          attendees: string[]
+          created_at: string
+          date: string
+          id: string
+          project_id: string
+          topic: string
+          transcript: string
+          updated_at: string
+        }
+        Insert: {
+          attendees?: string[]
+          created_at?: string
+          date?: string
+          id?: string
+          project_id: string
+          topic: string
+          transcript: string
+          updated_at?: string
+        }
+        Update: {
+          attendees?: string[]
+          created_at?: string
+          date?: string
+          id?: string
+          project_id?: string
+          topic?: string
+          transcript?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meetings_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_readmes: {
         Row: {
           created_at: string
@@ -117,24 +223,35 @@ export type Database = {
       }
       projects: {
         Row: {
+          client_id: string | null
           created_at: string
           id: string
           name: string
           updated_at: string
         }
         Insert: {
+          client_id?: string | null
           created_at?: string
           id?: string
           name: string
           updated_at?: string
         }
         Update: {
+          client_id?: string | null
           created_at?: string
           id?: string
           name?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "projects_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
