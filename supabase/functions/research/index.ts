@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { query, projectId } = await req.json();
+    const { query, projectId, analysisType = 'general' } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     if (!LOVABLE_API_KEY) {
@@ -28,9 +28,7 @@ serve(async (req) => {
       );
     }
 
-    console.log('Research request:', { query, projectId });
-
-    const { analysisType = 'general' } = await req.json();
+    console.log('Research request:', { query, projectId, analysisType });
     
     let systemPrompt = '';
     
