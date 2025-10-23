@@ -5,8 +5,10 @@ import { TeamList } from "@/components/TeamList";
 import { MeetingList } from "@/components/MeetingList";
 import { MeetingAnalyzer } from "@/components/MeetingAnalyzer";
 import { AIResearch } from "@/components/AIResearch";
+import { MarketAnalysis } from "@/components/MarketAnalysis";
+import { SwotAnalysis } from "@/components/SwotAnalysis";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Briefcase, Calendar, Sparkles } from "lucide-react";
+import { Briefcase, Calendar, Sparkles, TrendingUp, Target } from "lucide-react";
 
 const Index = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -53,7 +55,7 @@ const Index = () => {
           </div>
         ) : (
           <Tabs defaultValue="meetings" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsList className="grid w-full grid-cols-4 mb-6">
               <TabsTrigger value="meetings" className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
                 Meeting Debriefs
@@ -61,6 +63,14 @@ const Index = () => {
               <TabsTrigger value="research" className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4" />
                 AI Research
+              </TabsTrigger>
+              <TabsTrigger value="market" className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                Market Analysis
+              </TabsTrigger>
+              <TabsTrigger value="swot" className="flex items-center gap-2">
+                <Target className="h-4 w-4" />
+                SWOT Analysis
               </TabsTrigger>
             </TabsList>
 
@@ -83,6 +93,20 @@ const Index = () => {
 
             <TabsContent value="research">
               <AIResearch 
+                projectName={selectedProject.name}
+                projectId={selectedProject.id}
+              />
+            </TabsContent>
+
+            <TabsContent value="market">
+              <MarketAnalysis 
+                projectName={selectedProject.name}
+                projectId={selectedProject.id}
+              />
+            </TabsContent>
+
+            <TabsContent value="swot">
+              <SwotAnalysis 
                 projectName={selectedProject.name}
                 projectId={selectedProject.id}
               />
