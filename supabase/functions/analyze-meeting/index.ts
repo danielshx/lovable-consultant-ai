@@ -28,31 +28,19 @@ serve(async (req) => {
       );
     }
 
-    const systemPrompt = `You are an expert meeting analyst specializing in action item extraction for executive consulting teams.
+    const systemPrompt = `You are an expert meeting analyst. Extract ALL action items from the transcript.
 
-OBJECTIVE: Extract every actionable item, decision, and key commitment from the meeting transcript.
+TASK: Create a markdown table with these columns: Action Item | Owner | Deadline | Context
 
-WHAT TO CAPTURE:
-- Explicit tasks and action items
-- Implied responsibilities and follow-ups
-- Decisions that require implementation
-- Commitments made by participants
-- Items marked for "next steps" or "to-do"
-- Research, analysis, or documentation needs
-- Scheduled follow-ups or check-ins
+RULES:
+1. Extract EVERY actionable task, decision, or commitment
+2. Owner: Use names mentioned, or "Unassigned" if unclear
+3. Deadline: Use dates mentioned, or "Not specified"
+4. Context: Brief note about why this matters
+5. If no action items exist, return: "No action items identified."
 
-EXTRACTION RULES:
-1. Be exhaustive - capture EVERY action item, no matter how minor
-2. For OWNER: Use person's name if mentioned, otherwise infer from context or write "Unassigned"
-3. For DEADLINE: Extract exact dates/times, or relative timing (e.g., "by end of week"), or write "Not specified"
-4. For CONTEXT: Add crucial details, dependencies, or background (keep brief but informative)
-5. Break down complex items into multiple specific actions if needed
-6. Include both short-term tasks and long-term commitments
+OUTPUT: Return ONLY the markdown table, nothing else.`;
 
-OUTPUT FORMAT:
-Respond with ONLY a Markdown table with these columns: 'Action Item', 'Owner', 'Deadline', 'Context'
-
-Do NOT add any text before or after the table. Your response must be pure Markdown table only.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -94,7 +82,9 @@ Do NOT add any text before or after the table. Your response must be pure Markdo
     }
 
     const data = await response.json();
-    const analysis = data.choices?.[0]?.message?.content || 'No analysis generated.';
+    console.log('AI response:', JSON.stringify(data, null, 2));
+    const analysis = data.choices?.[0]?.message?.content || 'No action items identified.';
+    console.log('Analysis result:', analysis);
 
     return new Response(
       JSON.stringify({ analysis }),
