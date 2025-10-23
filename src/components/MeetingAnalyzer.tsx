@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Brain, Loader2, Calendar, Users, X, Upload, FileAudio, FileText, Mic, Square } from "lucide-react";
+import { Brain, Loader2, Calendar, Users, X, Upload, FileAudio, FileText, Mic, Square, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
@@ -39,6 +39,7 @@ export const MeetingAnalyzer = ({ meeting, projectId, onClose, onMeetingAdded }:
   const [analysis, setAnalysis] = useState<string>("");
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>(meeting.attachedFiles || []);
   const [analysisHistory, setAnalysisHistory] = useState<any[]>([]);
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -46,7 +47,19 @@ export const MeetingAnalyzer = ({ meeting, projectId, onClose, onMeetingAdded }:
 
   useEffect(() => {
     fetchAnalysisHistory();
+    fetchTeamMembers();
   }, [meeting.id]);
+
+  const fetchTeamMembers = async () => {
+    const { data, error } = await supabase
+      .from('project_team_members')
+      .select('email')
+      .eq('project_id', projectId);
+
+    if (!error && data) {
+      setTeamMembers(data);
+    }
+  };
 
   const fetchAnalysisHistory = async () => {
     const { data, error } = await supabase
@@ -314,6 +327,25 @@ export const MeetingAnalyzer = ({ meeting, projectId, onClose, onMeetingAdded }:
     }
   };
 
+  const handleEmailAnalysis = () => {
+    if (!analysis) {
+      toast({
+        title: "No Analysis",
+        description: "Please analyze the meeting first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const recipients = teamMembers.map(member => member.email).join(',');
+    const subject = encodeURIComponent(`Meeting Analysis: ${meeting.topic}`);
+    const body = encodeURIComponent(
+      `Meeting: ${meeting.topic}\nDate: ${new Date(meeting.date).toLocaleDateString()}\nAttendees: ${meeting.attendees.join(", ")}\n\n${analysis}`
+    );
+    
+    window.location.href = `mailto:${recipients}?subject=${subject}&body=${body}`;
+  };
+
   return (
     <Card className="shadow-[var(--shadow-card)] border-primary/20">
       <CardHeader>
@@ -447,10 +479,20 @@ export const MeetingAnalyzer = ({ meeting, projectId, onClose, onMeetingAdded }:
 
         {analysis && (
           <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <Brain className="h-4 w-4 text-primary" />
-              Current Analysis
-            </h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <Brain className="h-4 w-4 text-primary" />
+                Current Analysis
+              </h3>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleEmailAnalysis}
+              >
+                <Mail className="h-4 w-4 mr-2" />
+                Email
+              </Button>
+            </div>
             <div className="p-4 rounded-lg bg-secondary/20 border border-border prose prose-sm max-w-none dark:prose-invert prose-table:border-collapse prose-th:border prose-th:border-border prose-th:bg-secondary/50 prose-th:p-2 prose-td:border prose-td:border-border prose-td:p-2">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis}</ReactMarkdown>
             </div>
