@@ -195,6 +195,7 @@ export const AIResearch = ({ projectName, projectId }: AIResearchProps) => {
                   <Button
                     variant="ghost"
                     size="sm"
+                    className="cursor-pointer hover:bg-secondary"
                     onClick={() => {
                       setQuery(item.query);
                       setResult(item.result);

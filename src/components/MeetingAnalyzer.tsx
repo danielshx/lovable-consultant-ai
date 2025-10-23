@@ -458,6 +458,7 @@ export const MeetingAnalyzer = ({ meeting, projectId, onClose, onMeetingAdded }:
                   <Button
                     variant="ghost"
                     size="sm"
+                    className="cursor-pointer hover:bg-secondary"
                     onClick={() => setAnalysis(item.analysis)}
                   >
                     {analysis === item.analysis ? 'Viewing' : 'View'}

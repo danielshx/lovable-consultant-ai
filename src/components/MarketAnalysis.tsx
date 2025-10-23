@@ -167,6 +167,7 @@ export const MarketAnalysis = ({ projectName, projectId }: MarketAnalysisProps) 
                   <Button
                     variant="ghost"
                     size="sm"
+                    className="cursor-pointer hover:bg-secondary"
                     onClick={() => {
                       setQuery(item.query);
                       setResult(item.result);

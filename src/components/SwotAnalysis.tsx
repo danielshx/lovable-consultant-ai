@@ -264,6 +264,7 @@ export const SwotAnalysis = ({ projectName, projectId }: SwotAnalysisProps) => {
                   <Button
                     variant="ghost"
                     size="sm"
+                    className="cursor-pointer hover:bg-secondary"
                     onClick={() => setResult(item.result)}
                   >
                     View
