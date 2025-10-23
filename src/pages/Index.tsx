@@ -4,7 +4,9 @@ import { ProjectSelector } from "@/components/ProjectSelector";
 import { TeamList } from "@/components/TeamList";
 import { MeetingList } from "@/components/MeetingList";
 import { MeetingAnalyzer } from "@/components/MeetingAnalyzer";
-import { Briefcase } from "lucide-react";
+import { AIResearch } from "@/components/AIResearch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Briefcase, Calendar, Sparkles } from "lucide-react";
 
 const Index = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -50,22 +52,42 @@ const Index = () => {
             </p>
           </div>
         ) : (
-          <div className="space-y-6">
-            {selectedMeeting && (
-              <MeetingAnalyzer 
-                meeting={selectedMeeting}
-                onClose={() => setSelectedMeeting(null)}
+          <Tabs defaultValue="meetings" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="meetings" className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Meeting Debriefs
+              </TabsTrigger>
+              <TabsTrigger value="research" className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4" />
+                AI Research
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="meetings" className="space-y-6">
+              {selectedMeeting && (
+                <MeetingAnalyzer 
+                  meeting={selectedMeeting}
+                  onClose={() => setSelectedMeeting(null)}
+                />
+              )}
+              
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                <TeamList project={selectedProject} />
+                <MeetingList 
+                  meetings={currentMeetings}
+                  onMeetingSelect={handleMeetingSelect}
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="research">
+              <AIResearch 
+                projectName={selectedProject.name}
+                projectId={selectedProject.id}
               />
-            )}
-            
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <TeamList project={selectedProject} />
-              <MeetingList 
-                meetings={currentMeetings}
-                onMeetingSelect={handleMeetingSelect}
-              />
-            </div>
-          </div>
+            </TabsContent>
+          </Tabs>
         )}
       </main>
     </div>
