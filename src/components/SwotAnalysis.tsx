@@ -4,25 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Target, Plus, X, Clock, Users, UserX, TrendingUp, AlertTriangle } from "lucide-react";
+import { Loader2, Target, Plus, X, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-
-interface SwotSection {
-  title: string;
-  items: string[];
-}
-
-interface ParsedSwot {
-  strengths: SwotSection;
-  weaknesses: SwotSection;
-  opportunities: SwotSection;
-  threats: SwotSection;
-}
 
 interface SwotAnalysisProps {
   projectName?: string;
@@ -72,41 +60,6 @@ export const SwotAnalysis = ({ projectName, projectId }: SwotAnalysisProps) => {
   const removeCompetitor = (index: number) => {
     if (competitors.length > 1) {
       setCompetitors(competitors.filter((_, i) => i !== index));
-    }
-  };
-
-  const parseSwotAnalysis = (text: string): ParsedSwot | null => {
-    try {
-      const sections = {
-        strengths: { title: "Stärken", items: [] as string[] },
-        weaknesses: { title: "Schwächen", items: [] as string[] },
-        opportunities: { title: "Chancen", items: [] as string[] },
-        threats: { title: "Risiken", items: [] as string[] }
-      };
-
-      const strengthsMatch = text.match(/(?:Strengths?|Stärken)[:\s]*([\s\S]*?)(?=(?:Weaknesses?|Schwächen|Opportunities?|Chancen|Threats?|Risiken|##|$))/i);
-      const weaknessesMatch = text.match(/(?:Weaknesses?|Schwächen)[:\s]*([\s\S]*?)(?=(?:Opportunities?|Chancen|Threats?|Risiken|##|$))/i);
-      const opportunitiesMatch = text.match(/(?:Opportunities?|Chancen)[:\s]*([\s\S]*?)(?=(?:Threats?|Risiken|##|$))/i);
-      const threatsMatch = text.match(/(?:Threats?|Risiken)[:\s]*([\s\S]*?)(?=##|$)/i);
-
-      const extractItems = (matchText: string | undefined) => {
-        if (!matchText) return [];
-        return matchText
-          .split('\n')
-          .map(line => line.replace(/^[-*•]\s*/, '').trim())
-          .filter(line => line.length > 0 && !line.match(/^#{1,6}\s/));
-      };
-
-      sections.strengths.items = extractItems(strengthsMatch?.[1]);
-      sections.weaknesses.items = extractItems(weaknessesMatch?.[1]);
-      sections.opportunities.items = extractItems(opportunitiesMatch?.[1]);
-      sections.threats.items = extractItems(threatsMatch?.[1]);
-
-      const hasContent = Object.values(sections).some(section => section.items.length > 0);
-      return hasContent ? sections : null;
-    } catch (error) {
-      console.error('Error parsing SWOT:', error);
-      return null;
     }
   };
 
@@ -171,8 +124,6 @@ export const SwotAnalysis = ({ projectName, projectId }: SwotAnalysisProps) => {
       setLoading(false);
     }
   };
-
-  const parsedSwot = result ? parseSwotAnalysis(result) : null;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -272,120 +223,7 @@ export const SwotAnalysis = ({ projectName, projectId }: SwotAnalysisProps) => {
         </CardContent>
       </Card>
 
-      {result && parsedSwot && (
-        <Card className="shadow-card animate-fade-in-up border-accent/20">
-          <CardHeader className="border-b border-border/50 bg-secondary/20">
-            <CardTitle className="text-2xl font-heading flex items-center gap-2">
-              <div className="p-2 bg-accent/10 rounded-lg">
-                <Target className="h-5 w-5 text-accent" />
-              </div>
-              SWOT Analyse
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-8">
-            {/* Grid Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
-              {/* Header Labels */}
-              <div className="lg:col-span-2 grid grid-cols-2 gap-6 mb-2">
-                <div className="text-center">
-                  <h3 className="text-lg font-semibold text-foreground">Positives</h3>
-                </div>
-                <div className="text-center">
-                  <h3 className="text-lg font-semibold text-foreground">Negatives</h3>
-                </div>
-              </div>
-
-              {/* Strengths - Top Left */}
-              <div className="relative">
-                <div className="absolute -left-12 top-1/2 -translate-y-1/2 -rotate-90 origin-center hidden lg:block">
-                  <span className="text-sm font-semibold text-muted-foreground">Internes</span>
-                </div>
-                <div className="relative bg-gradient-to-br from-cyan-500 to-teal-600 rounded-3xl p-8 text-white min-h-[280px] overflow-hidden">
-                  <div className="absolute top-6 right-6 opacity-20">
-                    <Users className="w-16 h-16" strokeWidth={1.5} />
-                  </div>
-                  <div className="absolute bottom-6 right-6 text-6xl font-bold opacity-30">
-                    S
-                  </div>
-                  <h3 className="text-2xl font-bold mb-6">{parsedSwot.strengths.title}</h3>
-                  <ul className="space-y-3 relative z-10">
-                    {parsedSwot.strengths.items.slice(0, 5).map((item, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        <span className="text-white/80 mt-1">•</span>
-                        <span className="text-sm leading-relaxed">{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              {/* Weaknesses - Top Right */}
-              <div className="relative bg-gradient-to-br from-purple-500 to-pink-600 rounded-3xl p-8 text-white min-h-[280px] overflow-hidden">
-                <div className="absolute top-6 right-6 opacity-20">
-                  <UserX className="w-16 h-16" strokeWidth={1.5} />
-                </div>
-                <div className="absolute bottom-6 right-6 text-6xl font-bold opacity-30">
-                  W
-                </div>
-                <h3 className="text-2xl font-bold mb-6">{parsedSwot.weaknesses.title}</h3>
-                <ul className="space-y-3 relative z-10">
-                  {parsedSwot.weaknesses.items.slice(0, 5).map((item, idx) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <span className="text-white/80 mt-1">•</span>
-                      <span className="text-sm leading-relaxed">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Opportunities - Bottom Left */}
-              <div className="relative">
-                <div className="absolute -left-12 top-1/2 -translate-y-1/2 -rotate-90 origin-center hidden lg:block">
-                  <span className="text-sm font-semibold text-muted-foreground">Externes</span>
-                </div>
-                <div className="relative bg-gradient-to-br from-teal-400 to-cyan-600 rounded-3xl p-8 text-white min-h-[280px] overflow-hidden">
-                  <div className="absolute top-6 right-6 opacity-20">
-                    <TrendingUp className="w-16 h-16" strokeWidth={1.5} />
-                  </div>
-                  <div className="absolute bottom-6 right-6 text-6xl font-bold opacity-30">
-                    O
-                  </div>
-                  <h3 className="text-2xl font-bold mb-6">{parsedSwot.opportunities.title}</h3>
-                  <ul className="space-y-3 relative z-10">
-                    {parsedSwot.opportunities.items.slice(0, 5).map((item, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        <span className="text-white/80 mt-1">•</span>
-                        <span className="text-sm leading-relaxed">{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              {/* Threats - Bottom Right */}
-              <div className="relative bg-gradient-to-br from-fuchsia-500 to-purple-700 rounded-3xl p-8 text-white min-h-[280px] overflow-hidden">
-                <div className="absolute top-6 right-6 opacity-20">
-                  <AlertTriangle className="w-16 h-16" strokeWidth={1.5} />
-                </div>
-                <div className="absolute bottom-6 right-6 text-6xl font-bold opacity-30">
-                  T
-                </div>
-                <h3 className="text-2xl font-bold mb-6">{parsedSwot.threats.title}</h3>
-                <ul className="space-y-3 relative z-10">
-                  {parsedSwot.threats.items.slice(0, 5).map((item, idx) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <span className="text-white/80 mt-1">•</span>
-                      <span className="text-sm leading-relaxed">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {result && !parsedSwot && (
+      {result && (
         <Card className="shadow-card animate-fade-in-up border-accent/20">
           <CardHeader className="border-b border-border/50 bg-secondary/20">
             <CardTitle className="text-2xl font-heading flex items-center gap-2">
