@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { mockProjects, mockMeetings, Project, Meeting } from "@/lib/mockData";
-import { Header } from "@/components/Header";
 import { ProjectSelector } from "@/components/ProjectSelector";
 import { TeamList } from "@/components/TeamList";
 import { MeetingList } from "@/components/MeetingList";
@@ -25,9 +24,14 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-[var(--gradient-subtle)]">
-      <Header />
-      
-      <main className="container mx-auto px-6 py-8">
+      <main className="container mx-auto px-6 py-8 max-w-7xl">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-foreground mb-2">Project Dashboard</h2>
+          <p className="text-muted-foreground">
+            Manage your consulting projects and analyze meetings with AI
+          </p>
+        </div>
+
         <ProjectSelector 
           selectedProject={selectedProject}
           onProjectChange={handleProjectChange}
@@ -54,7 +58,7 @@ const Index = () => {
               />
             )}
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
               <TeamList project={selectedProject} />
               <MeetingList 
                 meetings={currentMeetings}
