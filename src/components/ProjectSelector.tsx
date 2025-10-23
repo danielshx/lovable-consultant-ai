@@ -99,7 +99,7 @@ export const ProjectSelector = ({ selectedProject, onProjectChange }: ProjectSel
         <FolderKanban className="h-5 w-5 text-primary" />
         <label className="text-sm font-semibold text-foreground">Select Project:</label>
       </div>
-      <Select value={selectedProject?.id} onValueChange={handleChange}>
+      <Select value={selectedProject?.id || ""} onValueChange={handleChange}>
         <SelectTrigger className="w-full bg-card hover:bg-secondary/50 transition-colors">
           <SelectValue placeholder="Choose a project..." />
         </SelectTrigger>

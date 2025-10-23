@@ -138,7 +138,7 @@ export const AIResearch = ({ projectName, projectId }: AIResearchProps) => {
 
           <Button
             onClick={handleResearch}
-            disabled={isResearching || !query.trim()}
+            disabled={isResearching || !query?.trim()}
             className="w-full h-12 bg-gradient-primary hover:shadow-glow transition-all text-base font-semibold"
           >
             {isResearching ? (
