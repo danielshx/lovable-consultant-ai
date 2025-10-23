@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Brain, Loader2, Calendar, Users, X, Upload, FileAudio, FileText } from "lucide-react";
+import { Brain, Loader2, Calendar, Users, X, Upload, FileAudio, FileText, Mic, Square } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
@@ -18,9 +18,12 @@ export const MeetingAnalyzer = ({ meeting, onClose }: MeetingAnalyzerProps) => {
   const [transcript, setTranscript] = useState(meeting.transcript);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
   const [analysis, setAnalysis] = useState<string>("");
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>(meeting.attachedFiles || []);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
   const { toast } = useToast();
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,6 +104,114 @@ export const MeetingAnalyzer = ({ meeting, onClose }: MeetingAnalyzerProps) => {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
+    }
+  };
+
+  const handleStartRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'audio/webm'
+      });
+      
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        
+        // Stop all tracks
+        stream.getTracks().forEach(track => track.stop());
+        
+        // Send to transcribe
+        await handleRecordingComplete(audioBlob);
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+      
+      toast({
+        title: "Recording Started",
+        description: "Speak into your microphone. Click Stop when done.",
+      });
+    } catch (error: any) {
+      console.error('Recording error:', error);
+      toast({
+        title: "Recording Failed",
+        description: error.message || "Failed to access microphone. Please check permissions.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleStopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
+  const handleRecordingComplete = async (audioBlob: Blob) => {
+    setIsTranscribing(true);
+
+    try {
+      // Convert blob to base64
+      const base64Data = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result as string;
+          const base64 = result.split(',')[1];
+          resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(audioBlob);
+      });
+
+      // Call transcribe edge function
+      const { data, error } = await supabase.functions.invoke('transcribe', {
+        body: {
+          fileData: base64Data,
+          fileName: 'recording.webm',
+          fileType: 'audio/webm',
+        },
+        headers: {
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.text) {
+        setTranscript(data.text);
+        toast({
+          title: "Recording Transcribed",
+          description: "Your recording has been transcribed successfully.",
+        });
+
+        // Add to attached files list
+        const newFile: AttachedFile = {
+          name: 'live-recording.webm',
+          type: 'audio',
+          size: audioBlob.size
+        };
+        setAttachedFiles([...attachedFiles, newFile]);
+      }
+    } catch (error: any) {
+      console.error('Transcription error:', error);
+      toast({
+        title: "Transcription Failed",
+        description: error.message || "Failed to transcribe the recording.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsTranscribing(false);
     }
   };
 
@@ -196,9 +307,9 @@ export const MeetingAnalyzer = ({ meeting, onClose }: MeetingAnalyzerProps) => {
           
           <div className="mb-3 p-3 rounded-lg bg-secondary/20 border border-border">
             <label className="text-xs font-medium text-muted-foreground block mb-2">
-              Or upload a file:
+              Record live or upload a file:
             </label>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -207,10 +318,28 @@ export const MeetingAnalyzer = ({ meeting, onClose }: MeetingAnalyzerProps) => {
                 className="hidden"
               />
               <Button
+                variant={isRecording ? "destructive" : "default"}
+                size="sm"
+                onClick={isRecording ? handleStopRecording : handleStartRecording}
+                disabled={isTranscribing}
+              >
+                {isRecording ? (
+                  <>
+                    <Square className="h-4 w-4 mr-2" />
+                    Stop Recording
+                  </>
+                ) : (
+                  <>
+                    <Mic className="h-4 w-4 mr-2" />
+                    Record Live
+                  </>
+                )}
+              </Button>
+              <Button
                 variant="outline"
                 size="sm"
                 onClick={() => fileInputRef.current?.click()}
-                disabled={isTranscribing}
+                disabled={isTranscribing || isRecording}
               >
                 {isTranscribing ? (
                   <>
@@ -220,12 +349,12 @@ export const MeetingAnalyzer = ({ meeting, onClose }: MeetingAnalyzerProps) => {
                 ) : (
                   <>
                     <Upload className="h-4 w-4 mr-2" />
-                    Upload & Transcribe
+                    Upload File
                   </>
                 )}
               </Button>
               <span className="text-xs text-muted-foreground">
-                Accepts .txt and .mp3 files
+                {isRecording ? "Recording..." : "Record or upload .txt/.mp3"}
               </span>
             </div>
           </div>
@@ -235,7 +364,7 @@ export const MeetingAnalyzer = ({ meeting, onClose }: MeetingAnalyzerProps) => {
             onChange={(e) => setTranscript(e.target.value)}
             className="min-h-[150px] font-mono text-sm bg-secondary/20"
             placeholder="Enter or edit the meeting transcript..."
-            disabled={isTranscribing}
+            disabled={isTranscribing || isRecording}
           />
         </div>
 

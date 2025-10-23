@@ -62,8 +62,14 @@ serve(async (req) => {
       );
     }
 
-    // Handle audio files (MP3)
-    if (fileType === 'audio/mpeg' || fileType === 'audio/mp3' || fileName.endsWith('.mp3')) {
+    // Handle audio files (MP3 and WebM)
+    if (
+      fileType === 'audio/mpeg' || 
+      fileType === 'audio/mp3' || 
+      fileType === 'audio/webm' ||
+      fileName.endsWith('.mp3') ||
+      fileName.endsWith('.webm')
+    ) {
       const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
       if (!OPENAI_API_KEY) {
         throw new Error('OPENAI_API_KEY is not configured');
@@ -74,9 +80,15 @@ serve(async (req) => {
       // Process audio in chunks
       const binaryAudio = processBase64Chunks(fileData);
       
+      // Determine the correct MIME type
+      let mimeType = 'audio/mpeg';
+      if (fileType === 'audio/webm' || fileName.endsWith('.webm')) {
+        mimeType = 'audio/webm';
+      }
+      
       // Prepare form data
       const formData = new FormData();
-      const blob = new Blob([binaryAudio], { type: 'audio/mpeg' });
+      const blob = new Blob([binaryAudio], { type: mimeType });
       formData.append('file', blob, fileName);
       formData.append('model', 'whisper-1');
 
@@ -104,7 +116,7 @@ serve(async (req) => {
       );
     }
 
-    throw new Error('Unsupported file type. Only .txt and .mp3 files are supported.');
+    throw new Error('Unsupported file type. Only .txt, .mp3, and .webm files are supported.');
 
   } catch (error: any) {
     console.error('Transcription error:', error);
