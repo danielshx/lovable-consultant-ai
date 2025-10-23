@@ -3,6 +3,7 @@ import { Users, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export const Header = () => {
   const user = mockAuth.getCurrentUser();
@@ -23,6 +24,7 @@ export const Header = () => {
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
+            <SidebarTrigger />
             <div className="rounded-lg bg-primary p-2">
               <Users className="h-6 w-6 text-primary-foreground" />
             </div>
