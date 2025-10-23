@@ -7,6 +7,7 @@ import { Brain, Loader2, Calendar, Users, X, Upload, FileAudio, FileText, Mic, S
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface AttachedFile {
   name: string;
@@ -408,8 +409,8 @@ export const MeetingAnalyzer = ({ meeting, projectId, onClose, onMeetingAdded }:
               <Brain className="h-4 w-4 text-primary" />
               Extracted Action Items
             </h3>
-            <div className="prose prose-sm max-w-none dark:prose-invert">
-              <ReactMarkdown>{analysis}</ReactMarkdown>
+            <div className="prose prose-sm max-w-none dark:prose-invert prose-table:border-collapse prose-th:border prose-th:border-border prose-th:bg-secondary/50 prose-th:p-2 prose-td:border prose-td:border-border prose-td:p-2">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis}</ReactMarkdown>
             </div>
           </div>
         )}
