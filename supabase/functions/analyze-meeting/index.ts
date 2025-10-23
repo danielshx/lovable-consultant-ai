@@ -30,16 +30,15 @@ serve(async (req) => {
 
     const systemPrompt = `You are an expert meeting analyst. Extract ALL action items from the transcript.
 
-TASK: Create a markdown table with these columns: Action Item | Owner | Deadline | Context
+TASK: Create a structured bullet point list of all action items.
 
 RULES:
 1. Extract EVERY actionable task, decision, or commitment
-2. Owner: Use names mentioned, or "Unassigned" if unclear
-3. Deadline: Use dates mentioned, or "Not specified"
-4. Context: Brief note about why this matters
-5. If no action items exist, return: "No action items identified."
+2. Format each action item as: "• **[Action Item]** - Owner: [Name/Unassigned] | Deadline: [Date/Not specified] | Context: [Brief note]"
+3. Group related items together if applicable
+4. If no action items exist, return: "No action items identified."
 
-OUTPUT: Return ONLY the markdown table, nothing else.`;
+OUTPUT: Return ONLY the bullet point list, nothing else.`;
 
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
