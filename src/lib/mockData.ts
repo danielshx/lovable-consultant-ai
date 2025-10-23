@@ -9,6 +9,12 @@ export const mockProjects = [
   {
     id: 'p1',
     name: 'Project Alpha (Client X)',
+    client: {
+      company: 'TechCorp Industries',
+      contactPerson: 'Michael Weber',
+      email: 'michael.weber@techcorp.com',
+      phone: '+49 30 12345678'
+    },
     team: [
       { name: 'Dr. Anna Schmidt', role: 'Project Lead', email: 'anna.schmidt@consulting.eu' },
       { name: 'Max Mustermann', role: 'Analyst', email: 'max.mustermann@consulting.eu' },
@@ -18,6 +24,12 @@ export const mockProjects = [
   {
     id: 'p2',
     name: 'Project Beta (Client Y)',
+    client: {
+      company: 'Global Finance AG',
+      contactPerson: 'Lisa Müller',
+      email: 'lisa.mueller@globalfinance.de',
+      phone: '+49 69 98765432'
+    },
     team: [
       { name: 'Dr. Anna Schmidt', role: 'Project Lead', email: 'anna.schmidt@consulting.eu' },
       { name: 'John Doe', role: 'Analyst', email: 'john.doe@consulting.eu' },
@@ -64,9 +76,17 @@ export interface TeamMember {
   email: string;
 }
 
+export interface Client {
+  company: string;
+  contactPerson: string;
+  email: string;
+  phone: string;
+}
+
 export interface Project {
   id: string;
   name: string;
+  client: Client;
   team: TeamMember[];
 }
 
