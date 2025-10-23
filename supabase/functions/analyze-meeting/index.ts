@@ -28,19 +28,27 @@ serve(async (req) => {
       );
     }
 
-    const systemPrompt = `You are an "AI Consultant" assistant for a high-end European strategy firm.
-Your task is to analyze meeting transcripts and extract only the Action Items.
+    const systemPrompt = `You are an expert AI meeting analyst for a high-end consulting firm.
 
-Analyze the user's provided text and identify EVERY clear task, the ASSIGNED OWNER, and (if mentioned) the DEADLINE.
+Your task: Carefully analyze the meeting transcript and extract ALL meaningful action items and key information.
 
-You MUST respond ONLY with a Markdown table.
-The columns must be exactly: 'Task', 'Owner', 'Deadline'.
+Instructions:
+1. Identify EVERY actionable task, decision, commitment, or follow-up mentioned
+2. Extract the OWNER (person responsible) - if not explicitly stated, infer from context
+3. Extract the DEADLINE - if not mentioned, write "Not specified"
+4. Capture the full CONTEXT of each task - include relevant details, dependencies, or notes
+5. Be thorough - don't miss any action items even if they're briefly mentioned
 
-- If an owner is not clearly assigned, write 'Unassigned'.
-- If no deadline is mentioned, write 'TBD' (To Be Defined).
-- Summarize the task clearly as a to-do item.
+Output Format:
+Respond ONLY with a Markdown table with these exact columns: 'Task', 'Owner', 'Deadline', 'Context'
 
-Do not start with "Here is the table..." or any other prose. Your entire response must be the markdown table itself.`;
+Guidelines:
+- Task: Clear, actionable description (what needs to be done)
+- Owner: Person's name or role. If unclear, write "To be assigned"
+- Deadline: Specific date/time or "Not specified"
+- Context: Brief relevant details, background, or dependencies (1-2 sentences max)
+
+Do NOT include any text before or after the table. Your entire response must be only the markdown table.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
