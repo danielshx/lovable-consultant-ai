@@ -88,47 +88,58 @@ export const SwotAnalysis = ({ projectName, projectId }: SwotAnalysisProps) => {
   };
 
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Target className="h-5 w-5" />
+    <div className="space-y-6 animate-fade-in">
+      <Card className="shadow-card hover-lift border-border/50">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-3 text-2xl font-heading">
+            <div className="p-2 bg-accent/10 rounded-lg">
+              <Target className="h-6 w-6 text-accent" />
+            </div>
             Competitor SWOT Analysis & Market Gap Identification
           </CardTitle>
-          <CardDescription>
-            {projectName && `Project: ${projectName} • `}
-            Analyze competitors and identify market opportunities
+          <CardDescription className="text-base mt-2">
+            {projectName && (
+              <span className="inline-flex items-center gap-2 text-primary font-medium mb-2">
+                <span className="w-2 h-2 rounded-full bg-primary animate-pulse-glow"></span>
+                {projectName}
+              </span>
+            )}
+            <span className="block text-muted-foreground">
+              Analyze competitors and identify market opportunities
+            </span>
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <RadioGroup value={mode} onValueChange={(value) => setMode(value as "auto" | "manual")}>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3 p-3 rounded-lg border border-border/50 hover:border-primary/50 transition-colors cursor-pointer">
               <RadioGroupItem value="auto" id="auto" />
-              <Label htmlFor="auto">Auto-generate top 5 competitors</Label>
+              <Label htmlFor="auto" className="cursor-pointer font-medium">Auto-generate top 5 competitors</Label>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3 p-3 rounded-lg border border-border/50 hover:border-primary/50 transition-colors cursor-pointer">
               <RadioGroupItem value="manual" id="manual" />
-              <Label htmlFor="manual">Enter competitors manually</Label>
+              <Label htmlFor="manual" className="cursor-pointer font-medium">Enter competitors manually</Label>
             </div>
           </RadioGroup>
 
           {mode === "auto" ? (
-            <div className="space-y-2">
-              <Label>Industry / Market Segment</Label>
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">Industry / Market Segment</Label>
               <Input
                 placeholder="e.g., 'Automotive Battery Producers', 'Cloud Storage Providers', 'European E-Commerce'"
                 value={industry}
                 onChange={(e) => setIndustry(e.target.value)}
+                className="h-12 bg-secondary/30 border-border/50 focus:border-primary transition-colors"
               />
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <Label>Competitors (min. 3, recommended 5)</Label>
+                <Label className="text-base font-semibold">Competitors (min. 3, recommended 5)</Label>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={addCompetitor}
+                  className="hover:bg-primary/10 hover:text-primary hover:border-primary"
                 >
                   <Plus className="h-4 w-4 mr-1" />
                   Add
@@ -140,12 +151,14 @@ export const SwotAnalysis = ({ projectName, projectId }: SwotAnalysisProps) => {
                     placeholder={`Competitor ${index + 1}`}
                     value={competitor}
                     onChange={(e) => handleCompetitorChange(index, e.target.value)}
+                    className="h-11 bg-secondary/30 border-border/50 focus:border-primary transition-colors"
                   />
                   {competitors.length > 1 && (
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => removeCompetitor(index)}
+                      className="hover:bg-destructive/10 hover:text-destructive"
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -158,11 +171,11 @@ export const SwotAnalysis = ({ projectName, projectId }: SwotAnalysisProps) => {
           <Button 
             onClick={handleAnalysis} 
             disabled={loading}
-            className="w-full"
+            className="w-full h-12 bg-gradient-primary hover:shadow-glow transition-all text-base font-semibold"
           >
             {loading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                 Generating SWOT Analysis...
               </>
             ) : (
@@ -173,12 +186,17 @@ export const SwotAnalysis = ({ projectName, projectId }: SwotAnalysisProps) => {
       </Card>
 
       {result && (
-        <Card>
-          <CardHeader>
-            <CardTitle>SWOT Analysis Results</CardTitle>
+        <Card className="shadow-card animate-fade-in-up border-accent/20">
+          <CardHeader className="border-b border-border/50 bg-secondary/20">
+            <CardTitle className="text-2xl font-heading flex items-center gap-2">
+              <div className="p-2 bg-accent/10 rounded-lg">
+                <Target className="h-5 w-5 text-accent" />
+              </div>
+              SWOT Analysis Results
+            </CardTitle>
           </CardHeader>
-          <CardContent className="p-6">
-            <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-table:text-sm">
+          <CardContent className="p-8">
+            <div className="prose-enhanced">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>{result}</ReactMarkdown>
             </div>
           </CardContent>

@@ -60,21 +60,30 @@ export const AIResearch = ({ projectName, projectId }: AIResearchProps) => {
   };
 
   return (
-    <div className="space-y-6">
-      <Card className="shadow-[var(--shadow-card)]">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-foreground">
-            <Sparkles className="h-5 w-5 text-primary" />
+    <div className="space-y-6 animate-fade-in">
+      <Card className="shadow-card hover-lift border-border/50">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-3 text-2xl font-heading">
+            <div className="p-2 bg-accent/10 rounded-lg">
+              <Sparkles className="h-6 w-6 text-accent" />
+            </div>
             AI Research Assistant
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-base mt-2">
             {projectName ? (
               <>
-                Your research will automatically use the context of your selected project:{" "}
-                <span className="font-semibold text-foreground">{projectName}</span>
+                <span className="inline-flex items-center gap-2 text-primary font-medium mb-2">
+                  <span className="w-2 h-2 rounded-full bg-primary animate-pulse-glow"></span>
+                  {projectName}
+                </span>
+                <span className="block text-muted-foreground">
+                  Your research will automatically use the context of your selected project
+                </span>
               </>
             ) : (
-              "Select a project above to provide context for your research."
+              <span className="text-muted-foreground">
+                Select a project above to provide context for your research
+              </span>
             )}
           </CardDescription>
         </CardHeader>
@@ -86,7 +95,7 @@ export const AIResearch = ({ projectName, projectId }: AIResearchProps) => {
             <Textarea
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="min-h-[120px] bg-secondary/20"
+              className="min-h-[140px] bg-secondary/30 border-border/50 focus:border-primary transition-colors resize-none"
               placeholder="e.g., 'Find the top 5 competitors for Client X in the logistics sector' or 'Summarize recent market trends for Project Beta'..."
             />
           </div>
@@ -94,16 +103,16 @@ export const AIResearch = ({ projectName, projectId }: AIResearchProps) => {
           <Button
             onClick={handleResearch}
             disabled={isResearching || !query.trim()}
-            className="w-full bg-primary hover:bg-primary/90"
+            className="w-full h-12 bg-gradient-primary hover:shadow-glow transition-all text-base font-semibold"
           >
             {isResearching ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                 Researching...
               </>
             ) : (
               <>
-                <Brain className="mr-2 h-4 w-4" />
+                <Brain className="mr-2 h-5 w-5" />
                 Start Research
               </>
             )}
@@ -112,15 +121,17 @@ export const AIResearch = ({ projectName, projectId }: AIResearchProps) => {
       </Card>
 
       {result && (
-        <Card className="shadow-[var(--shadow-card)] border-primary/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-foreground">
-              <Brain className="h-5 w-5 text-primary" />
+        <Card className="shadow-card animate-fade-in-up border-accent/20">
+          <CardHeader className="border-b border-border/50 bg-secondary/20">
+            <CardTitle className="text-2xl font-heading flex items-center gap-2">
+              <div className="p-2 bg-accent/10 rounded-lg">
+                <Brain className="h-5 w-5 text-accent" />
+              </div>
               Research Results
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6">
-            <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-table:text-sm">
+          <CardContent className="p-8">
+            <div className="prose-enhanced">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>{result}</ReactMarkdown>
             </div>
           </CardContent>
