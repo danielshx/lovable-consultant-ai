@@ -289,6 +289,11 @@ export const MeetingAnalyzer = ({ meeting, projectId, onClose, onMeetingAdded }:
 
       if (saveError) {
         console.error('Error saving analysis:', saveError);
+        toast({
+          title: "Analysis not saved",
+          description: "You don't have permission to save to history. Showing current analysis only.",
+          variant: "destructive",
+        });
       } else {
         fetchAnalysisHistory();
       }
@@ -439,6 +444,18 @@ export const MeetingAnalyzer = ({ meeting, projectId, onClose, onMeetingAdded }:
             </>
           )}
         </Button>
+
+        {analysis && (
+          <div className="space-y-2">
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <Brain className="h-4 w-4 text-primary" />
+              Current Analysis
+            </h3>
+            <div className="p-4 rounded-lg bg-secondary/20 border border-border prose prose-sm max-w-none dark:prose-invert prose-table:border-collapse prose-th:border prose-th:border-border prose-th:bg-secondary/50 prose-th:p-2 prose-td:border prose-td:border-border prose-td:p-2">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis}</ReactMarkdown>
+            </div>
+          </div>
+        )}
 
         {analysisHistory.length > 0 && (
           <div className="space-y-4">
