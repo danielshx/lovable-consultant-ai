@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -38,10 +38,30 @@ export const MeetingAnalyzer = ({ meeting, projectId, onClose, onMeetingAdded }:
   const [isRecording, setIsRecording] = useState(false);
   const [analysis, setAnalysis] = useState<string>("");
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>(meeting.attachedFiles || []);
+  const [analysisHistory, setAnalysisHistory] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const { toast } = useToast();
+
+  useEffect(() => {
+    fetchAnalysisHistory();
+  }, [meeting.id]);
+
+  const fetchAnalysisHistory = async () => {
+    const { data, error } = await supabase
+      .from('meeting_analyses')
+      .select('*')
+      .eq('meeting_id', meeting.id)
+      .order('created_at', { ascending: false });
+
+    if (!error && data) {
+      setAnalysisHistory(data);
+      if (data.length > 0) {
+        setAnalysis(data[0].analysis);
+      }
+    }
+  };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -256,6 +276,23 @@ export const MeetingAnalyzer = ({ meeting, projectId, onClose, onMeetingAdded }:
       if (error) throw error;
 
       setAnalysis(data.analysis);
+      
+      // Save to database
+      const { error: saveError } = await supabase
+        .from('meeting_analyses')
+        .insert({
+          meeting_id: meeting.id,
+          project_id: projectId,
+          transcript: transcript,
+          analysis: data.analysis,
+        });
+
+      if (saveError) {
+        console.error('Error saving analysis:', saveError);
+      } else {
+        fetchAnalysisHistory();
+      }
+
       toast({
         title: "Analysis Complete",
         description: "Action items have been extracted successfully.",
@@ -403,15 +440,36 @@ export const MeetingAnalyzer = ({ meeting, projectId, onClose, onMeetingAdded }:
           )}
         </Button>
 
-        {analysis && (
-          <div className="mt-6 p-4 rounded-lg bg-secondary/20 border border-border">
-            <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+        {analysisHistory.length > 0 && (
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
               <Brain className="h-4 w-4 text-primary" />
-              Extracted Action Items
+              Analysis History ({analysisHistory.length})
             </h3>
-            <div className="prose prose-sm max-w-none dark:prose-invert prose-table:border-collapse prose-th:border prose-th:border-border prose-th:bg-secondary/50 prose-th:p-2 prose-td:border prose-td:border-border prose-td:p-2">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis}</ReactMarkdown>
-            </div>
+            {analysisHistory.map((item, index) => (
+              <div 
+                key={item.id}
+                className="p-4 rounded-lg bg-secondary/20 border border-border"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <Badge variant="secondary" className="text-xs">
+                    {index === 0 ? 'Latest' : new Date(item.created_at).toLocaleString()}
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setAnalysis(item.analysis)}
+                  >
+                    {analysis === item.analysis ? 'Viewing' : 'View'}
+                  </Button>
+                </div>
+                {analysis === item.analysis && (
+                  <div className="prose prose-sm max-w-none dark:prose-invert prose-table:border-collapse prose-th:border prose-th:border-border prose-th:bg-secondary/50 prose-th:p-2 prose-td:border prose-td:border-border prose-td:p-2">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{item.analysis}</ReactMarkdown>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </CardContent>

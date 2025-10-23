@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Brain, Loader2, Sparkles } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Brain, Loader2, Sparkles, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
@@ -17,7 +18,31 @@ export const AIResearch = ({ projectName, projectId }: AIResearchProps) => {
   const [query, setQuery] = useState("");
   const [isResearching, setIsResearching] = useState(false);
   const [result, setResult] = useState<string>("");
+  const [history, setHistory] = useState<any[]>([]);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (projectId) {
+      fetchHistory();
+    }
+  }, [projectId]);
+
+  const fetchHistory = async () => {
+    if (!projectId) return;
+    const { data } = await supabase
+      .from('ai_research_results')
+      .select('*')
+      .eq('project_id', projectId)
+      .order('created_at', { ascending: false });
+    
+    if (data) {
+      setHistory(data);
+      if (data.length > 0) {
+        setResult(data[0].result);
+        setQuery(data[0].query);
+      }
+    }
+  };
 
   const handleResearch = async () => {
     if (!query.trim()) {
@@ -43,6 +68,17 @@ export const AIResearch = ({ projectName, projectId }: AIResearchProps) => {
       if (error) throw error;
 
       setResult(data.result);
+      
+      // Save to database
+      if (projectId) {
+        await supabase.from('ai_research_results').insert({
+          project_id: projectId,
+          query: query,
+          result: data.result,
+        });
+        fetchHistory();
+      }
+
       toast({
         title: "Research Complete",
         description: "AI has analyzed your query successfully.",
@@ -134,6 +170,41 @@ export const AIResearch = ({ projectName, projectId }: AIResearchProps) => {
             <div className="prose-enhanced">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>{result}</ReactMarkdown>
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {history.length > 0 && (
+        <Card className="shadow-card animate-fade-in-up">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5" />
+              Research History ({history.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {history.map((item, index) => (
+              <div key={item.id} className="p-4 rounded-lg bg-secondary/20 border border-border">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex-1">
+                    <Badge variant="secondary" className="text-xs mb-2">
+                      {new Date(item.created_at).toLocaleString()}
+                    </Badge>
+                    <p className="text-sm text-muted-foreground line-clamp-2">{item.query}</p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setQuery(item.query);
+                      setResult(item.result);
+                    }}
+                  >
+                    View
+                  </Button>
+                </div>
+              </div>
+            ))}
           </CardContent>
         </Card>
       )}

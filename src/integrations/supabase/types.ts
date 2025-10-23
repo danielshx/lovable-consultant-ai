@@ -14,6 +14,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_research_results: {
+        Row: {
+          created_at: string
+          id: string
+          project_id: string
+          query: string
+          result: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          project_id: string
+          query: string
+          result: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          project_id?: string
+          query?: string
+          result?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_research_results_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_personas: {
         Row: {
           client_id: string
@@ -90,6 +122,80 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      market_analyses: {
+        Row: {
+          created_at: string
+          id: string
+          project_id: string
+          query: string
+          result: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          project_id: string
+          query: string
+          result: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          project_id?: string
+          query?: string
+          result?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_analyses_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meeting_analyses: {
+        Row: {
+          analysis: string
+          created_at: string
+          id: string
+          meeting_id: string
+          project_id: string
+          transcript: string
+        }
+        Insert: {
+          analysis: string
+          created_at?: string
+          id?: string
+          meeting_id: string
+          project_id: string
+          transcript: string
+        }
+        Update: {
+          analysis?: string
+          created_at?: string
+          id?: string
+          meeting_id?: string
+          project_id?: string
+          transcript?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_analyses_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_analyses_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       meeting_files: {
         Row: {
@@ -296,6 +402,44 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      swot_analyses: {
+        Row: {
+          analysis_mode: string
+          competitors: string[] | null
+          created_at: string
+          id: string
+          industry: string | null
+          project_id: string
+          result: string
+        }
+        Insert: {
+          analysis_mode: string
+          competitors?: string[] | null
+          created_at?: string
+          id?: string
+          industry?: string | null
+          project_id: string
+          result: string
+        }
+        Update: {
+          analysis_mode?: string
+          competitors?: string[] | null
+          created_at?: string
+          id?: string
+          industry?: string | null
+          project_id?: string
+          result?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "swot_analyses_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
