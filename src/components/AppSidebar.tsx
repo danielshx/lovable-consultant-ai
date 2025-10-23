@@ -1,4 +1,4 @@
-import { FolderKanban, Users, Calendar, LayoutDashboard } from "lucide-react";
+import { FolderKanban, Users, Calendar, LayoutDashboard, History } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
   Sidebar,
@@ -18,6 +18,7 @@ const navigation = [
   { title: "Projects", url: "/projects", icon: FolderKanban },
   { title: "Meetings", url: "/meetings", icon: Calendar },
   { title: "Team", url: "/team", icon: Users },
+  { title: "History", url: "/history", icon: History },
 ];
 
 export function AppSidebar() {
