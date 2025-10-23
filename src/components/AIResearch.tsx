@@ -6,6 +6,7 @@ import { Brain, Loader2, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface AIResearchProps {
   projectName?: string;
@@ -118,9 +119,9 @@ export const AIResearch = ({ projectName, projectId }: AIResearchProps) => {
               Research Results
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="prose prose-sm max-w-none dark:prose-invert">
-              <ReactMarkdown>{result}</ReactMarkdown>
+          <CardContent className="p-6">
+            <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-table:text-sm">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{result}</ReactMarkdown>
             </div>
           </CardContent>
         </Card>

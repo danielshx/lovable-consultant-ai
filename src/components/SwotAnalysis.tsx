@@ -7,6 +7,7 @@ import { Loader2, Target, Plus, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 
@@ -176,9 +177,9 @@ export const SwotAnalysis = ({ projectName, projectId }: SwotAnalysisProps) => {
           <CardHeader>
             <CardTitle>SWOT Analysis Results</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="prose prose-sm max-w-none dark:prose-invert">
-              <ReactMarkdown>{result}</ReactMarkdown>
+          <CardContent className="p-6">
+            <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-table:text-sm">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{result}</ReactMarkdown>
             </div>
           </CardContent>
         </Card>
