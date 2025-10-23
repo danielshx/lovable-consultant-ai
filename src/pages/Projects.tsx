@@ -1,11 +1,81 @@
-import { useState } from "react";
-import { mockProjects } from "@/lib/mockData";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { FolderKanban, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { FolderKanban, Users } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+
+interface TeamMember {
+  id: string;
+  name: string;
+  role: string;
+  email: string;
+}
+
+interface Client {
+  id: string;
+  company: string;
+  contact_person: string;
+  email: string;
+  phone: string | null;
+}
+
+interface Project {
+  id: string;
+  name: string;
+  client: Client | null;
+  team: TeamMember[];
+}
 
 const Projects = () => {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const fetchProjects = async () => {
+    const { data, error } = await supabase
+      .from('projects')
+      .select(`
+        *,
+        clients (
+          id,
+          company,
+          contact_person,
+          email,
+          phone
+        ),
+        project_team_members (
+          id,
+          name,
+          role,
+          email
+        )
+      `)
+      .order('name');
+
+    if (error) {
+      toast({
+        title: "Error fetching projects",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const formattedProjects: Project[] = (data || []).map((project: any) => ({
+      id: project.id,
+      name: project.name,
+      client: project.clients,
+      team: project.project_team_members || [],
+    }));
+
+    setProjects(formattedProjects);
+  };
+
   return (
     <div className="min-h-screen bg-[var(--gradient-subtle)]">
       <main className="container mx-auto px-6 py-8 max-w-7xl">
@@ -17,7 +87,7 @@ const Projects = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mockProjects.map((project) => (
+          {projects.map((project) => (
             <Card 
               key={project.id}
               className="shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-hover)] transition-shadow"

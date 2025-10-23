@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { mockProjects, mockMeetings, Project, Meeting } from "@/lib/mockData";
+import { useState, useEffect } from "react";
 import { ProjectSelector } from "@/components/ProjectSelector";
 import { TeamList } from "@/components/TeamList";
 import { MeetingList } from "@/components/MeetingList";
@@ -9,13 +8,53 @@ import { MarketAnalysis } from "@/components/MarketAnalysis";
 import { SwotAnalysis } from "@/components/SwotAnalysis";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Briefcase, Calendar, Sparkles, TrendingUp, Target } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+
+interface TeamMember {
+  id: string;
+  name: string;
+  role: string;
+  email: string;
+}
+
+interface Client {
+  id: string;
+  company: string;
+  contact_person: string;
+  email: string;
+  phone: string | null;
+}
+
+interface Project {
+  id: string;
+  name: string;
+  client: Client | null;
+  team: TeamMember[];
+}
+
+interface AttachedFile {
+  name: string;
+  type: 'audio' | 'text';
+  size: number;
+}
+
+interface Meeting {
+  id: string;
+  date: string;
+  topic: string;
+  attendees: string[];
+  transcript: string;
+  attachedFiles?: AttachedFile[];
+}
 
 const Index = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
+  const [meetings, setMeetings] = useState<Meeting[]>([]);
+  const { toast } = useToast();
 
-  const handleProjectChange = (projectId: string) => {
-    const project = mockProjects.find(p => p.id === projectId) || null;
+  const handleProjectChange = (projectId: string, project: Project | null) => {
     setSelectedProject(project);
     setSelectedMeeting(null);
   };
@@ -24,7 +63,54 @@ const Index = () => {
     setSelectedMeeting(meeting);
   };
 
-  const currentMeetings = selectedProject ? mockMeetings[selectedProject.id] || [] : [];
+  useEffect(() => {
+    if (selectedProject) {
+      fetchMeetings();
+    } else {
+      setMeetings([]);
+    }
+  }, [selectedProject]);
+
+  const fetchMeetings = async () => {
+    if (!selectedProject) return;
+
+    const { data, error } = await supabase
+      .from('meetings')
+      .select(`
+        *,
+        meeting_files (
+          name,
+          type,
+          size
+        )
+      `)
+      .eq('project_id', selectedProject.id)
+      .order('date', { ascending: false });
+
+    if (error) {
+      toast({
+        title: "Error fetching meetings",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const formattedMeetings: Meeting[] = (data || []).map((meeting: any) => ({
+      id: meeting.id,
+      date: meeting.date,
+      topic: meeting.topic,
+      attendees: meeting.attendees || [],
+      transcript: meeting.transcript,
+      attachedFiles: meeting.meeting_files?.map((file: any) => ({
+        name: file.name,
+        type: file.type,
+        size: file.size,
+      })) || [],
+    }));
+
+    setMeetings(formattedMeetings);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
@@ -94,14 +180,16 @@ const Index = () => {
               {selectedMeeting && (
                 <MeetingAnalyzer 
                   meeting={selectedMeeting}
+                  projectId={selectedProject.id}
                   onClose={() => setSelectedMeeting(null)}
+                  onMeetingAdded={fetchMeetings}
                 />
               )}
               
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 <TeamList project={selectedProject} />
                 <MeetingList 
-                  meetings={currentMeetings}
+                  meetings={meetings}
                   onMeetingSelect={handleMeetingSelect}
                 />
               </div>

@@ -1,27 +1,110 @@
-import { useState } from "react";
-import { mockMeetings, mockProjects } from "@/lib/mockData";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Users, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+
+interface AttachedFile {
+  name: string;
+  type: string;
+  size: number;
+}
+
+interface Meeting {
+  id: string;
+  date: string;
+  topic: string;
+  attendees: string[];
+  transcript: string;
+  projectId: string;
+  projectName: string;
+  attachedFiles?: AttachedFile[];
+}
+
+interface Project {
+  id: string;
+  name: string;
+}
 
 const Meetings = () => {
   const [filterProject, setFilterProject] = useState<string>("all");
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [meetings, setMeetings] = useState<Meeting[]>([]);
+  const { toast } = useToast();
 
-  // Flatten all meetings with project info
-  const allMeetings = Object.entries(mockMeetings).flatMap(([projectId, meetings]) => {
-    const project = mockProjects.find(p => p.id === projectId);
-    return meetings.map(meeting => ({
-      ...meeting,
-      projectId,
-      projectName: project?.name || "Unknown Project"
+  useEffect(() => {
+    fetchProjects();
+    fetchMeetings();
+  }, []);
+
+  const fetchProjects = async () => {
+    const { data, error } = await supabase
+      .from('projects')
+      .select('id, name')
+      .order('name');
+
+    if (error) {
+      toast({
+        title: "Error fetching projects",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setProjects(data || []);
+  };
+
+  const fetchMeetings = async () => {
+    const { data, error } = await supabase
+      .from('meetings')
+      .select(`
+        *,
+        projects (
+          id,
+          name
+        ),
+        meeting_files (
+          name,
+          type,
+          size
+        )
+      `)
+      .order('date', { ascending: false });
+
+    if (error) {
+      toast({
+        title: "Error fetching meetings",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const formattedMeetings: Meeting[] = (data || []).map((meeting: any) => ({
+      id: meeting.id,
+      date: meeting.date,
+      topic: meeting.topic,
+      attendees: meeting.attendees || [],
+      transcript: meeting.transcript,
+      projectId: meeting.project_id,
+      projectName: meeting.projects?.name || 'Unknown Project',
+      attachedFiles: meeting.meeting_files?.map((file: any) => ({
+        name: file.name,
+        type: file.type,
+        size: file.size,
+      })) || [],
     }));
-  }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    setMeetings(formattedMeetings);
+  };
 
   const filteredMeetings = filterProject === "all" 
-    ? allMeetings 
-    : allMeetings.filter(m => m.projectId === filterProject);
+    ? meetings 
+    : meetings.filter((meeting) => meeting.projectId === filterProject);
 
   return (
     <div className="min-h-screen bg-[var(--gradient-subtle)]">
@@ -37,15 +120,15 @@ const Meetings = () => {
           <label className="text-sm font-semibold text-foreground mb-2 block">Filter by Project:</label>
           <Select value={filterProject} onValueChange={setFilterProject}>
             <SelectTrigger className="w-full md:w-[300px] bg-card">
-              <SelectValue placeholder="All Projects" />
-            </SelectTrigger>
-            <SelectContent className="bg-popover">
-              <SelectItem value="all">All Projects</SelectItem>
-              {mockProjects.map((project) => (
-                <SelectItem key={project.id} value={project.id}>
-                  {project.name}
-                </SelectItem>
-              ))}
+            <SelectValue placeholder="All Projects" />
+          </SelectTrigger>
+          <SelectContent className="bg-popover">
+            <SelectItem value="all">All Projects</SelectItem>
+            {projects.map((project) => (
+              <SelectItem key={project.id} value={project.id}>
+                {project.name}
+              </SelectItem>
+            ))}
             </SelectContent>
           </Select>
         </div>
@@ -79,7 +162,7 @@ const Meetings = () => {
                     <Users className="h-4 w-4" />
                     <span>{meeting.attendees.length} attendees</span>
                   </div>
-                  {meeting.attachedFiles && (
+                  {meeting.attachedFiles && meeting.attachedFiles.length > 0 && (
                     <div className="flex items-center gap-2">
                       <FileText className="h-4 w-4" />
                       <span>{meeting.attachedFiles.length} attached files</span>

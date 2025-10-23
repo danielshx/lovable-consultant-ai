@@ -1,5 +1,4 @@
 import { useState, useRef } from "react";
-import { Meeting, AttachedFile } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,12 +8,29 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
 
-interface MeetingAnalyzerProps {
-  meeting: Meeting;
-  onClose: () => void;
+interface AttachedFile {
+  name: string;
+  type: 'audio' | 'text';
+  size: number;
 }
 
-export const MeetingAnalyzer = ({ meeting, onClose }: MeetingAnalyzerProps) => {
+interface Meeting {
+  id: string;
+  date: string;
+  topic: string;
+  attendees: string[];
+  transcript: string;
+  attachedFiles?: AttachedFile[];
+}
+
+interface MeetingAnalyzerProps {
+  meeting: Meeting;
+  projectId: string;
+  onClose: () => void;
+  onMeetingAdded: () => void;
+}
+
+export const MeetingAnalyzer = ({ meeting, projectId, onClose, onMeetingAdded }: MeetingAnalyzerProps) => {
   const [transcript, setTranscript] = useState(meeting.transcript);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
