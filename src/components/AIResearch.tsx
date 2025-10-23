@@ -47,8 +47,8 @@ export const AIResearch = ({ projectName, projectId }: AIResearchProps) => {
   const handleResearch = async () => {
     if (!query.trim()) {
       toast({
-        title: "Empty Query",
-        description: "Please enter a research question.",
+        title: "Leere Anfrage",
+        description: "Bitte gib eine Suchanfrage ein.",
         variant: "destructive",
       });
       return;
@@ -80,14 +80,14 @@ export const AIResearch = ({ projectName, projectId }: AIResearchProps) => {
       }
 
       toast({
-        title: "Research Complete",
-        description: "AI has analyzed your query successfully.",
+        title: "Suche abgeschlossen",
+        description: "Die AI hat deine Anfrage erfolgreich beantwortet.",
       });
     } catch (error: any) {
       console.error("Research error:", error);
       toast({
-        title: "Research Failed",
-        description: error.message || "Failed to complete the research.",
+        title: "Suche fehlgeschlagen",
+        description: error.message || "Die Suche konnte nicht abgeschlossen werden.",
         variant: "destructive",
       });
     } finally {
@@ -103,7 +103,7 @@ export const AIResearch = ({ projectName, projectId }: AIResearchProps) => {
             <div className="p-2 bg-accent/10 rounded-lg">
               <Sparkles className="h-6 w-6 text-accent" />
             </div>
-            AI Research Assistant
+            Project Knowledge Search
           </CardTitle>
           <CardDescription className="text-base mt-2">
             {projectName ? (
@@ -113,12 +113,12 @@ export const AIResearch = ({ projectName, projectId }: AIResearchProps) => {
                   {projectName}
                 </span>
                 <span className="block text-muted-foreground">
-                  Your research will automatically use the context of your selected project
+                  Suche in allen Meeting-Transkripten, Analysen und bisherigen Recherchen dieses Projekts
                 </span>
               </>
             ) : (
               <span className="text-muted-foreground">
-                Select a project above to provide context for your research
+                Wähle ein Projekt aus, um in dessen Wissenssammlung zu suchen
               </span>
             )}
           </CardDescription>
@@ -126,13 +126,13 @@ export const AIResearch = ({ projectName, projectId }: AIResearchProps) => {
         <CardContent className="space-y-4">
           <div>
             <label className="text-sm font-semibold text-foreground mb-2 block">
-              Your Research Query:
+              Was möchtest du im Projekt-Wissen suchen?
             </label>
             <Textarea
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="min-h-[140px] bg-secondary/30 border-border/50 focus:border-primary transition-colors resize-none"
-              placeholder="e.g., 'Find the top 5 competitors for Client X in the logistics sector' or 'Summarize recent market trends for Project Beta'..."
+              placeholder="z.B. 'Welche Action Items wurden im letzten Meeting besprochen?' oder 'Fasse alle Entscheidungen zu Thema X zusammen' oder 'Was wurde über den Wettbewerber Y gesagt?'..."
             />
           </div>
 
@@ -144,12 +144,12 @@ export const AIResearch = ({ projectName, projectId }: AIResearchProps) => {
             {isResearching ? (
               <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Researching...
+                Suche läuft...
               </>
             ) : (
               <>
                 <Brain className="mr-2 h-5 w-5" />
-                Start Research
+                Im Projekt-Wissen suchen
               </>
             )}
           </Button>
@@ -163,7 +163,7 @@ export const AIResearch = ({ projectName, projectId }: AIResearchProps) => {
               <div className="p-2 bg-accent/10 rounded-lg">
                 <Brain className="h-5 w-5 text-accent" />
               </div>
-              Research Results
+              Suchergebnisse
             </CardTitle>
           </CardHeader>
           <CardContent className="p-8">
@@ -179,7 +179,7 @@ export const AIResearch = ({ projectName, projectId }: AIResearchProps) => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="h-5 w-5" />
-              Research History ({history.length})
+              Suchverlauf ({history.length})
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
